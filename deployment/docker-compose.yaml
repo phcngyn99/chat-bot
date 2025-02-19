@@ -1,0 +1,23 @@
+# version: "3.8"
+
+name: chatbot
+
+services:
+  chainlit:
+    hostname: chainlit
+    container_name: chainlit
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    image: chainlit
+    command: ["tail","-f","/dev/null"]
+    volumes:
+      - ../app:/app
+    networks:
+      datacore:
+        ipv4_address: "172.16.0.5"
+        
+networks:
+  datacore:
+    external: true
