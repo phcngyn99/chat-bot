@@ -5,9 +5,17 @@ import time
 from openai import AsyncOpenAI
 import os
 
+# Custom imports
+from ultils.ultils import *
+from ultils.logging import *
+
+from_env = FromEnv()
+
+chat_api_config = from_env.get_chat_api()
+
 client = AsyncOpenAI(
-    api_key=os.getenv(key="CHAT_API_KEY", default="ollama"),  # Consider storing this in a .env file
-    base_url=os.getenv(key="CHAT_API_URL", default="http://localhost:11434/v1/"),
+    api_key=chat_api_config.get("CHAT_API_KEY"),  # Consider storing this in a .env file
+    base_url=chat_api_config.get("CHAT_API_URL"),
 )
 
 
@@ -17,31 +25,45 @@ async def set_starters():
         cl.Starter(
             label="Morning routine ideation",
             message="Can you help me create a personalized morning routine that would help increase my productivity throughout the day? Start by asking me about my current habits and what activities energize me in the morning.",
-            icon="/public/light.png",
+            icon="/public/asset/light.png",
         ),
         cl.Starter(
             label="Explain superconductors",
             message="Explain superconductors like I'm five years old.",
-            icon="/public/chart.png",
+            icon="/public/asset/chart.png",
         ),
         cl.Starter(
             label="Python script for daily email reports",
             message="Write a script to automate sending daily email reports in Python, and walk me through how I would set it up.",
-            icon="/public/code.png",
+            icon="/public/asset/code.png",
         ),
         cl.Starter(
             label="Text inviting friend to wedding",
             message="Write a text asking a friend to be my plus-one at a wedding next month. I want to keep it super short and casual, and offer an out.",
-            icon="/public/cal.png",
+            icon="/public/asset/cal.png",
         ),
     ]
 
 
+@cl.set_chat_profiles
+async def chat_profile():
+
+    reasoning_models = from_env.get_models()
+    chat_profile_list = []
+
+    for ui_model_name, ollama_model_name in reasoning_models.items():
+        chat_profile_list.append(
+            cl.ChatProfile(
+                name=ollama_model_name,
+                markdown_description=f"How can i help you today?",
+                icon=f"./public/asset/binh.jpeg",
+            )
+        )
+    return chat_profile_list
+
 
 @cl.on_message
 async def main(message: cl.Message):
-    # Your custom logic goes here...
-
     elements = None
 
     if "test" in message.content:
@@ -108,7 +130,9 @@ async def main(message: cl.Message):
         )
 
         chart_element = cl.Plotly(name="chart", figure=fig, display="inline")
-        image_element = cl.Image(path="./cat.jpg", name=message.content, display="side")
+        image_element = cl.Image(
+            path="./public/asset/cat.jpg", name=message.content, display="side"
+        )
 
         elements = [
             df_element,
@@ -119,9 +143,13 @@ async def main(message: cl.Message):
             content=f"Received: {message.content}", elements=elements
         ).send()
     else:
-        start_time = time.time()  # More descriptive variable name
+        start_time = time.time()
+
+        chat_model = cl.user_session.get("chat_profile")
+        logger.info(f"Chat model: {chat_model}")
+
         stream = await client.chat.completions.create(
-            model="deepseek-r1:14b",  # Or load from config
+            model=chat_model,  # Or load from config
             messages=[
                 {"role": "system", "content": "You are a helpful assistant"},
                 *cl.chat_context.to_openai(),
