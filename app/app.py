@@ -6,8 +6,8 @@ from openai import AsyncOpenAI
 import os
 
 # Custom imports
-from ultils.ultils import *
-from ultils.logging import *
+from utils.utils import *
+from utils.logging import *
 
 from_env = FromEnv()
 
@@ -56,7 +56,7 @@ async def chat_profile():
             cl.ChatProfile(
                 name=ollama_model_name,
                 markdown_description=f"How can i help you today?",
-                icon=f"./public/asset/binh.jpeg",
+                # icon="https://picsum.photos/200",
             )
         )
     return chat_profile_list
@@ -151,7 +151,7 @@ async def main(message: cl.Message):
         stream = await client.chat.completions.create(
             model=chat_model,  # Or load from config
             messages=[
-                {"role": "system", "content": "You are a helpful assistant"},
+                # {"role": "system", "content": "You are a helpful assistant"},
                 *cl.chat_context.to_openai(),
             ],
             stream=True,

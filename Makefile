@@ -24,7 +24,7 @@ restart: down run
 check:
 	cd deployment && docker compose exec chainlit printenv
 
-test: cook run log
+test: build cook run log
 
 help:
 	@echo "Usage: make [target]"
@@ -38,6 +38,7 @@ help:
 	@echo "  cook      Stop the container and remove volumes"
 	@echo "  restart   Restart the container"
 	@echo "  check     Check the environment variables"
+	@echo "  test      Build, cook, run, and log the container"
 	@echo "  help      Show this help message"
 	@echo ""
 	@echo "Variables:"
@@ -53,3 +54,4 @@ help:
 	@echo "  make cook"
 	@echo "  make restart"
 	@echo "  make check"
+	@echo "  make test"
