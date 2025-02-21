@@ -1,0 +1,25 @@
+version: "3.8"
+
+name: model_serving
+
+services:
+  ollama:
+    image: ollama-extended
+    hostname: ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ../ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    networks:
+      datacore:
+        ipv4_address: "172.16.0.6"
+
+networks:
+  datacore:
+    external: true

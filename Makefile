@@ -1,5 +1,7 @@
 
 IMG_NAME ?= chainlit
+NETWORK_NAME ?= datacore
+SUBNET ?= 172.16.0.0/16
 
 build:
 	cd deployment && docker build -t ${IMG_NAME} .
@@ -11,7 +13,7 @@ log:
 	cd deployment && docker compose logs -f
 
 ps:
-	cd deployment && docker compose -f docker-compose.yaml ps 
+	cd deployment && docker compose -f docker-compose.yaml ps --no-trunc
 
 down:
 	cd deployment && docker compose down
@@ -25,6 +27,10 @@ check:
 	cd deployment && docker compose exec chainlit printenv
 
 test: build cook run log
+
+network:
+	@echo "Creating network $(NETWORK_NAME) with subnet $(SUBNET)"
+	@docker network create --subnet=$(SUBNET) $(NETWORK_NAME)
 
 help:
 	@echo "Usage: make [target]"
